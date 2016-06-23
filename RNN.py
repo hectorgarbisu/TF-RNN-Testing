@@ -30,7 +30,6 @@ class RNN:
         # Evaluate model
         #correct_pred = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
         #accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-
     def feed_rnn_cell(s, _X, _istate, _weights, _biases):
         _X = tf.transpose(_X, [1, 0, 2])  # permute n_steps and batch_size
         # Reshape to prepare input to hidden activation

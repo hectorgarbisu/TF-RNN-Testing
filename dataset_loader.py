@@ -30,15 +30,15 @@ class dataset_loader:
         "get list of available class names"
         class_cardinalities = self._get_labels(file_list)
         "get cardinality of each class (dictionary)"
-        print "labels dict: ",class_cardinalities
+        # print "labels dict: ",class_cardinalities
         "Cap every class set to a maximum number of members equal" \
         "to the size of the smaller class (ccty)"
         class_cardinalities = self._filter_labels(class_cardinalities,min_per_label,max_per_label)
-        print "filtered and adjusted labels: ", class_cardinalities
+        # print "filtered and adjusted labels: ", class_cardinalities
         "read (ccty) files of each class from folder at random order" \
         "get files, its labels, and its sizes"
         files,labels,sizes = self._get_files(file_list,class_cardinalities)
-        print "files: ",len(files)," labels: ",labels," sizes: ",sizes
+        # print "files: ",len(files)," labels: ",labels," sizes: ",sizes
         "center around first point"
         centered_sigs = self._center(files)
         "adjust over signature size, not canvas size"
