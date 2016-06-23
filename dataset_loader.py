@@ -61,7 +61,7 @@ class dataset_loader:
         # print len(self.training_set),len(self.training_labels),len(self.test_set),len(self.test_labels)
         # print [(labels[i],", prev size: ",len(files[i])," fixed size:",len(fixed_data[i])) for i in range(len(files))]
 
-        _, (b,c) = pyplot.subplots(2)
+        # _, (b,c) = pyplot.subplots(2)
         # b.plot([p[0] for p in files[4]],[p[1] for p in files[4]],'.')
         # c.plot([p[0] for p in fixed_data[4]],[p[1] for p in fixed_data[4]],'.')
         # # c.plot(fixed_data[4][::][0],fixed_data[4][::][1])

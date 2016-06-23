@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 from tensorflow.models.rnn import rnn, rnn_cell
-
 class RNN:
     def __init__(s, input_size, hidden_size, num_steps, output_size, alpha=0.01):
         s.input_size = input_size
@@ -57,6 +56,7 @@ class RNN:
                 for jj in range(s.input_size):
                     whole_batch[ii,hh,jj] = batch[ii][jj+hh]
         #print whole_batch.shape
+
         return s.sess.run(s.train, feed_dict={s.x: whole_batch, s.y_: expected_outputs, s.istate: np.zeros((len(expected_outputs), 2*s.hidden_size))})
 
     def error(s,batch,expected_outputs):
