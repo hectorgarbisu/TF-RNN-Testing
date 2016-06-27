@@ -76,7 +76,7 @@ def train(rnn,dl):
         train_time = time.time() - prev_time
         err = rnn.error(batch,hotone_labels)
         if (ii % (num_epochs//50)) == 0:
-            print ii,"/",num_epochs
+            # print ii,"/",num_epochs
             errors[sample_size_idx][num_steps_idx][jj] += err/test_repeat
             times[sample_size_idx][num_steps_idx][jj] += train_time/test_repeat
             jj+=1
@@ -108,9 +108,11 @@ def add_confusion_matrix(max0, max1, la_to_ho=plop):
 print plop.keys()
 for sample_size_idx,sample_size in enumerate(sss):
     for num_steps_idx,num_steps in enumerate(nss):
+        case_start_time = time.time()
         print("Case: sample_size=",sample_size," steps_%=",num_steps)
         for ii in range(test_repeat):
             single_test(sample_size,num_steps,ii)
+        print(time.time()-case_start_time,"s. for case: sample_size=",sample_size," steps_%=",num_steps)
         print times[sample_size_idx][num_steps_idx]
         print confusion_matrices[sample_size_idx][num_steps_idx]
 
