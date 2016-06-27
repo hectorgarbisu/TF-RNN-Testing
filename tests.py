@@ -12,10 +12,10 @@ dataset_path = "./dataset/"
 ######## FIXED PARAMETERS ########
 ##################################
 
-num_epochs = 50
+num_epochs = 200
 alpha = 0.01
 batch_size = 100
-nW_hidden = 20
+nW_hidden = 40
 test_repeat = 10
 
 num_clases = 0
