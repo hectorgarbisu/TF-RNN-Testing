@@ -1,5 +1,6 @@
 __author__ = 'geco'
 import RNN
+import time
 import numpy as np
 from dataset_loader import dataset_loader
 from tensorflow.python.framework import ops
@@ -11,7 +12,7 @@ dataset_path = "./dataset/"
 ######## FIXED PARAMETERS ########
 ##################################
 
-num_epochs = 200
+num_epochs = 50
 alpha = 0.01
 batch_size = 100
 nW_hidden = 20
@@ -28,11 +29,18 @@ plop = dl.get_labels_to_hot_dict()
 ##################################
 
 "sample sizes' = [int(100*(1.3**ii)) for ii in range(10)]"
-sss = [100, 130, 169, 219, 285, 371, 482, 627, 815, 1060]
-# "num steps' (% of sample_size; 0% = 1 single step)"
-nss = [0, 1, 1.5, 3,  6, 15, 30, 50, 70, 85]
+decreasing = True
+if decreasing:
+    ## IN REVERSE FOR TIME TESTING (comment one or other)
+    sss = [1060, 815, 627, 482, 371, 285, 219, 169, 130, 100]
+    nss = [85, 70, 50, 30,  15, 6, 3, 1.5, 1, 0]
+else:
+    sss = [100, 130, 169, 219, 285, 371, 482, 627, 815, 1060]
+    "num steps' (% of sample_size; 0% = 1 single step)"
+    nss = [0, 1, 1.5, 3,  6, 15, 30, 50, 70, 85]
 
 errors = np.zeros([len(sss),len(nss),50])
+times = np.zeros([len(sss),len(nss),50])
 confusion_matrices = np.zeros([len(sss),len(nss),6,6])
 # sss = [100]
 # nss = [1]
@@ -61,12 +69,16 @@ def single_test(sample_size,percentage_steps,ii):
 def train(rnn,dl):
     err = 0
     jj=0
+    prev_time = time.time()
     for ii in range(num_epochs):
         batch,_,hotone_labels = dl.next_2d_batch(batch_size)
         rnn.feed_batch(batch,hotone_labels)
+        train_time = time.time() - prev_time
         err = rnn.error(batch,hotone_labels)
         if (ii % (num_epochs//50)) == 0:
-            errors[sample_size_idx][num_steps_idx][jj] = err
+            print ii,"/",num_epochs
+            errors[sample_size_idx][num_steps_idx][jj] += err/test_repeat
+            times[sample_size_idx][num_steps_idx][jj] += train_time/test_repeat
             jj+=1
 
 ##################
@@ -93,11 +105,12 @@ def test(rnn,dl,la_to_ho):
 def add_confusion_matrix(max0, max1, la_to_ho=plop):
     confusion_matrices[sample_size_idx][num_steps_idx][max0][max1]+=1
 
+print plop.keys()
 for sample_size_idx,sample_size in enumerate(sss):
     for num_steps_idx,num_steps in enumerate(nss):
         print("Case: sample_size=",sample_size," steps_%=",num_steps)
         for ii in range(test_repeat):
             single_test(sample_size,num_steps,ii)
-        print plop.keys()
+        print times[sample_size_idx][num_steps_idx]
         print confusion_matrices[sample_size_idx][num_steps_idx]
 
