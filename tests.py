@@ -30,14 +30,13 @@ plop = dl.get_labels_to_hot_dict()
 ##################################
 
 "sample sizes' = [int(100*(1.3**ii)) for ii in range(10)]"
+"num steps' (% of sample_size; 0% = 1 single step)"
 decreasing = True
 if decreasing:
-    ## IN REVERSE FOR TIME TESTING (comment one or other)
     sss = [1060, 815, 627, 482, 371, 285, 219, 169, 130, 100]
     nss = [85, 70, 50, 30,  15, 6, 3, 1.5, 1, 0]
 else:
     sss = [100, 130, 169, 219, 285, 371, 482, 627, 815, 1060]
-    "num steps' (% of sample_size; 0% = 1 single step)"
     nss = [0, 1, 1.5, 3,  6, 15, 30, 50, 70, 85]
 
 errors = np.zeros([len(sss),len(nss),e_s])
