@@ -7,7 +7,7 @@ from tensorflow.python.framework import ops
 
 
 dataset_path = "./dataset/"
-
+result_path = "./results/"
 ##################################
 ######## FIXED PARAMETERS ########
 ##################################
@@ -17,6 +17,7 @@ alpha = 0.01
 batch_size = 100
 nW_hidden = 40
 test_repeat = 10
+e_s = 50 # error samples
 
 num_clases = 0
 sample_size_idx = 0
@@ -39,8 +40,8 @@ else:
     "num steps' (% of sample_size; 0% = 1 single step)"
     nss = [0, 1, 1.5, 3,  6, 15, 30, 50, 70, 85]
 
-errors = np.zeros([len(sss),len(nss),50])
-times = np.zeros([len(sss),len(nss),50])
+errors = np.zeros([len(sss),len(nss),e_s])
+times = np.zeros([len(sss),len(nss),e_s])
 confusion_matrices = np.zeros([len(sss),len(nss),6,6])
 # sss = [100]
 # nss = [1]
@@ -75,7 +76,7 @@ def train(rnn,dl):
         rnn.feed_batch(batch,hotone_labels)
         train_time = time.time() - prev_time
         err = rnn.error(batch,hotone_labels)
-        if (ii % (num_epochs//50)) == 0:
+        if (ii % (num_epochs//e_s)) == 0:
             # print ii,"/",num_epochs
             errors[sample_size_idx][num_steps_idx][jj] += err/test_repeat
             times[sample_size_idx][num_steps_idx][jj] += train_time/test_repeat
@@ -95,7 +96,6 @@ def test(rnn,dl,la_to_ho):
         max1 = np.argmax(predicted_label)
         total += 1
         # Build confusion matrix
-        # Make sure confusion matrices have same keys
         add_confusion_matrix(max0,max1)
         if(max0!=max1):
             error += 1
@@ -106,6 +106,26 @@ def add_confusion_matrix(max0, max1, la_to_ho=plop):
     confusion_matrices[sample_size_idx][num_steps_idx][max0][max1]+=1
 
 print plop.keys()
+
+
+def print_results_to_file():
+    error_file = open("%s%d-%d-error"%(result_path,sample_size,num_steps),"w")
+    for ii in range(e_s):
+        time_and_error = (times[sample_size_idx][num_steps_idx][ii],
+                          errors[sample_size_idx][num_steps_idx][ii])
+        error_file.write("%f:%f\n"%time_and_error)
+        print time_and_error
+    error_file.close()
+    confusion_file = open("%s%d-%d-confumat"%(result_path,sample_size,num_steps),"w")
+    confusion_file.write(" ".join(plop.keys())+"\n")
+    for ii in range(6):
+        for jj in range(6):
+            confusion_file.write(" "+str(confusion_matrices[sample_size_idx][num_steps_idx][ii][jj]))
+        confusion_file.write("\n")
+    confusion_file.close()
+    pass
+
+
 for sample_size_idx,sample_size in enumerate(sss):
     for num_steps_idx,num_steps in enumerate(nss):
         case_start_time = time.time()
@@ -115,4 +135,5 @@ for sample_size_idx,sample_size in enumerate(sss):
         print(time.time()-case_start_time,"s. for case: sample_size=",sample_size," steps_%=",num_steps)
         print times[sample_size_idx][num_steps_idx]
         print confusion_matrices[sample_size_idx][num_steps_idx]
+        print_results_to_file()
 
