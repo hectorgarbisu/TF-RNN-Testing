@@ -25,7 +25,7 @@ class dataset_loader:
     "it will be ignored. Program will also avoid reading over (max_per_label) samples" \
     "of a given class"
     "Each data sample will be adjusted to have exactly (fixed_sig_size) points"
-    def load(self, min_per_label=100, max_per_label=140, fixed_sig_size=100):
+    def load(self, fixed_sig_size=100, fill_method="interpolation",min_per_label=100, max_per_label=140,):
         file_list = listdir(self.path)
         "get list of available class names"
         class_cardinalities = self._get_labels(file_list)
@@ -45,7 +45,7 @@ class dataset_loader:
         resized_centered_sigs = self._resize(centered_sigs)
         # resized_centered_sigs = files
         "Fix every sample to (fixed_sig_length)"
-        fixed_data = self._interpolate_points(resized_centered_sigs,sizes,fixed_sig_size)
+        fixed_data = self._fill_samples(resized_centered_sigs,sizes,fixed_sig_size,fill_method)
         self.labels_to_hot = self._labels_to_hot(class_cardinalities)
         self.class_cardinalities = class_cardinalities
 
@@ -60,7 +60,7 @@ class dataset_loader:
             self.test_labels.append(labels[ii])
         # print len(self.training_set),len(self.training_labels),len(self.test_set),len(self.test_labels)
         # print [(labels[i],", prev size: ",len(files[i])," fixed size:",len(fixed_data[i])) for i in range(len(files))]
-
+        #
         # _, (b,c) = pyplot.subplots(2)
         # b.plot([p[0] for p in files[4]],[p[1] for p in files[4]],'.')
         # c.plot([p[0] for p in fixed_data[4]],[p[1] for p in fixed_data[4]],'.')
@@ -159,7 +159,33 @@ class dataset_loader:
         return resized_centered_signatures
 
 
-    def _interpolate_points(self,data_samples,sizes,number_of_points):
+    def _fill_samples(self,data_samples,sizes,number_of_points, fill_method):
+        if fill_method == "interpolation":
+            new_samples = self._interpolate(data_samples,sizes,number_of_points)
+        elif fill_method == "left_padding":
+            new_samples = self._add_padding(data_samples,number_of_points,0)
+        elif fill_method == "right_padding":
+            new_samples = self._add_padding(data_samples,number_of_points,-1)
+        else:
+            raise NameError("Invalid Filling Method: \"%s\""%fill_method)
+        return new_samples
+
+    def _add_padding(self, data_samples,  number_of_points, insertion_point=0):
+        new_points = deepcopy(data_samples)
+        if insertion_point == 0:
+            for ii in range(len(new_points)):
+                while (len(new_points[ii])<number_of_points):
+                    new_points[ii].insert(insertion_point,(0,0))
+                # print new_points[ii]
+        else:
+            for ii in range(len(new_points)):
+                while (len(new_points[ii])<number_of_points):
+                    new_points[ii].append((0,0))
+                # print new_points[ii]
+
+        return new_points
+
+    def _interpolate(self,data_samples,sizes,number_of_points):
         new_points = deepcopy(data_samples)
         for ii in range(len(sizes)):
             size = sizes[ii]

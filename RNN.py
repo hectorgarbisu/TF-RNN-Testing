@@ -49,7 +49,7 @@ class RNN:
         return tf.matmul(outputs[-1], _weights['out']) + _biases['out']
 
     def feed_batch(s, batch, expected_outputs):
-        # We have to divide each sequence in its num_steps sized chunks
+        # We have to divide each sequence in its fill_method sized chunks
         whole_batch = np.zeros([len(batch),s.num_steps,s.input_size])
         for ii in range(len(batch)):
             for hh in range(s.num_steps):
