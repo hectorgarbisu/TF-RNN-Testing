@@ -144,13 +144,15 @@ class dataset_loader:
         resized_centered_signatures = []
         a0 = 0.000001 # almost_zero : monstrous thing to prevent divisions by 0
         for i_c_s in irregular_centered_signatures:
-            xmax = max([xy[0]+a0 for xy in i_c_s])
-            ymax = max([xy[1]+a0 for xy in i_c_s])
-            xmin = min([xy[0]-a0 for xy in i_c_s])
-            ymin = min([xy[1]-a0 for xy in i_c_s])
+            xs = [xi for xi,yi in i_c_s]
+            ys = [yi for xi,yi in i_c_s]
+            xmax = max(abs(max(xs)),abs(min(xs)))+a0
+            ymax = max(abs(max(ys)),abs(min(ys)))+a0
             "Fitting is made so the first point keeps at 0,0"
-            xsf = min(-1/xmin,1/xmax) # x_scalation_factor
-            ysf = min(-1/ymin,1/ymax) # y_scalation_factor
+            xsf = 1/xmax # x_scalation_factor
+            ysf = 1/ymax # y_scalation_factor
+            assert(xsf>0.0001)
+            assert(ysf>0.0001)
             if preserve_aspect_ratio:
                 xsf = ysf = min(xsf,ysf)
             resized_centered_signatures.append(
