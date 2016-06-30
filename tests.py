@@ -8,14 +8,15 @@ from tensorflow.python.framework import ops
 
 dataset_path = "./dataset/"
 result_path = "./results/"
+
 ##################################
 ######## FIXED PARAMETERS ########
 ##################################
 
 num_epochs = 200
 alpha = 0.01
-batch_size = 10
-nW_hidden = 40
+batch_size = 100
+nW_hidden = 60
 test_repeat = 10
 e_s = 10 # error samples
 
@@ -24,7 +25,7 @@ sample_size_idx = 0
 fill_method_idx = 0
 dl = dataset_loader(dataset_path)
 dl.load(fixed_sig_size=100) #mock load
-plop = dl.get_labels_to_hot_dict()
+h_u_l = dl.get_labels_to_hot_dict() #homogenized unique labels so that every training use the same
 
 ##################################
 ########### VARIABLES ############
@@ -35,37 +36,35 @@ plop = dl.get_labels_to_hot_dict()
 
 fill_methods = ["interpolation", "left_padding", "right_padding"]
 # fill_methods = ["left_padding"]
+sample_sizes = [100, 130, 169, 219, 285, 371, 482, 627, 815, 1060]
 decreasing = False
 if decreasing:
-    sample_sizes = [1060, 815, 627, 482, 371, 285, 219, 169, 130, 100]
-    # sample_sizes = [482, 371, 285, 219, 169, 130, 100]
-else:
-    sample_sizes = [100, 130, 169, 219, 285, 371, 482, 627, 815, 1060]
+    sample_sizes = sample_sizes.reverse()
 
 
 errors = np.zeros([len(sample_sizes),len(fill_methods),e_s])
 times = np.zeros([len(sample_sizes),len(fill_methods),e_s])
-confusion_matrices = np.zeros([len(sample_sizes),len(fill_methods),6,6])
-# sample_sizes = [100]
-# nss = [1]
+confusion_matrices = np.zeros([len(sample_sizes),len(fill_methods),len(h_u_l),len(h_u_l)])
 
 def single_test(sample_size,fill_method):
     input_size = 2
     dl = dataset_loader(dataset_path)
     dl.load(fixed_sig_size=sample_size, fill_method=fill_method) #mock load
-    la_to_ho = plop
+    la_to_ho = h_u_l
     # la_to_ho = dl.get_labels_to_hot_dict()
     num_classes = len(la_to_ho)
     rnn = RNN.RNN(input_size,nW_hidden,sample_size,num_classes)
     # Get batch and its labels
+    cctime = time.time()
     train(rnn,dl)
-    test(rnn,dl,la_to_ho)
+    print test(rnn,dl,la_to_ho)," ,",time.time()-cctime," s."
     rnn.sess.close()
     ops.reset_default_graph()
 
 ##################
 ##### TRAIN ######
-##################
+####choo#choo#####
+
 def train(rnn,dl):
     err = 0
     jj=0
@@ -98,10 +97,10 @@ def test(rnn,dl,la_to_ho):
         add_confusion_matrix(max0,max1)
         if(max0!=max1):
             error += 1
-    print "errores: ",error, "/",total," : ",100*(1-float(error)/total),"% acierto"
+    return "errores: %d / %d : %f%%acierto"%(error,total,100*(1-float(error)/total))
 
 
-def add_confusion_matrix(max0, max1, la_to_ho=plop):
+def add_confusion_matrix(max0, max1, la_to_ho=h_u_l):
     confusion_matrices[sample_size_idx][fill_method_idx][max0][max1]+=1
 
 
@@ -114,23 +113,22 @@ def print_results_to_file():
         print time_and_error
     error_file.close()
     confusion_file = open("%s%d-%s-confumat"%(result_path,sample_size,fill_method),"w")
-    confusion_file.write(" ".join(plop.keys())+"\n")
+    confusion_file.write(" ".join(h_u_l.keys())+"\n")
     for ii in range(6):
         for jj in range(6):
             confusion_file.write(" "+str(confusion_matrices[sample_size_idx][fill_method_idx][ii][jj]))
         confusion_file.write("\n")
     confusion_file.close()
-    pass
 
 
 for sample_size_idx,sample_size in enumerate(sample_sizes):
     for fill_method_idx,fill_method in enumerate(fill_methods):
         case_start_time = time.time()
-        print plop.keys()
         print("Case: sample_size=",sample_size," fill_method=",fill_method)
         for ii in range(test_repeat):
             single_test(sample_size,fill_method)
-        print(time.time()-case_start_time,"s. for case: sample_size=",sample_size," steps_%=",fill_method)
+        print(time.time()-case_start_time,"s. for case: sample_size=",sample_size," fill_method=",fill_method)
         print times[sample_size_idx][fill_method_idx]
+        print h_u_l.keys()
         print confusion_matrices[sample_size_idx][fill_method_idx]
         print_results_to_file()
