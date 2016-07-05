@@ -9,6 +9,10 @@ results_path = "./results/"
 graphs_path = "./graphs/"
 file_list = listdir(results_path)
 
+def savefig(str):
+    print "saving %s"%str
+    plt.savefig(str)
+
 def error_graph(size,method,file):
     x = []
     y = []
@@ -24,7 +28,7 @@ def error_graph(size,method,file):
     plt.plot(x,y,".-",label="error")
 
     # plt.show()
-    plt.savefig("%s/%s-%s-error"%(graphs_path,size,method))
+    savefig("%s/%s-%s-error"%(graphs_path,size,method))
     plt.close()
     # print x,y
 
@@ -50,9 +54,9 @@ def error_multigraph(size_method_filenames):
         y = [float(a[1]) for a in val]
         plt.plot(x,y,".-",label=key)
     plt.legend()
-    plt.title("Error con interpolacion")
+    plt.title("Error con interpolado")
     # plt.show()
-    plt.savefig("%s/interplation-error"%(graphs_path))
+    savefig("%s/interplation-error"%(graphs_path))
     ax1 = plt.figure().add_subplot(111)
     ax1.set_ylabel("error (cross entropy)")
     ax1.set_xlabel("tiempo (s)")
@@ -64,7 +68,7 @@ def error_multigraph(size_method_filenames):
     plt.legend()
     plt.title("Error con relleno por la derecha")
     # plt.show()
-    plt.savefig("%s/right_padding-error"%(graphs_path))
+    savefig("%s/right_padding-error"%(graphs_path))
     ax1 = plt.figure().add_subplot(111)
     ax1.set_ylabel("error (cross entropy)")
     ax1.set_xlabel("tiempo (s)")
@@ -76,8 +80,19 @@ def error_multigraph(size_method_filenames):
     plt.legend()
     plt.title("Error con relleno por la izquierda")
     # plt.show()
-    plt.savefig("%s/left_padding-error"%(graphs_path))
-
+    savefig("%s/left_padding-error"%(graphs_path))
+    # PRINT MEAN EXECUTION TIME
+    timesbysize = []
+    for key in rpadding_errors.iterkeys():
+        times = float(rpadding_errors[key][-1][0])
+        times += float(lpadding_errors[key][-1][0])
+        times += float(interpolation_errors[key][-1][0])
+        timesbysize.append((key,times))
+    ax1 = plt.figure().add_subplot(111)
+    ax1.set_ylabel("Tiempo (s)")
+    ax1.set_xlabel("Longitud de muestra")
+    plt.plot([a[0] for a in timesbysize],[a[1] for a in timesbysize],".",label="Tiempo medio")
+    savefig("%s/exec_time"%(graphs_path))
 
 
 
@@ -116,13 +131,13 @@ def confu_multigraph(size_method_filenames):
 
     # show average classification errors by method and size
     ax1 = plt.figure().add_subplot(111)
-    ax1.set_ylabel("Error de clasificacion")
+    ax1.set_ylabel("Tasa de acierto")
     ax1.set_xlabel("Longitud de muestra")
-    plt.plot([ce[0] for ce in class_errors],[ce[1] for ce in class_errors],".-",label="interpolacion")
+    plt.plot([ce[0] for ce in class_errors],[ce[1] for ce in class_errors],".-",label="interpolado")
     plt.plot([ce[0] for ce in class_errors],[ce[2] for ce in class_errors],".-",label="relleno por la izquierda")
     plt.plot([ce[0] for ce in class_errors],[ce[3] for ce in class_errors],".-",label="relleno por la derecha")
     plt.legend(loc=5)
-    plt.savefig("%s/classification-errors-by-size"%graphs_path)
+    savefig("%s/classification-errors-by-size"%graphs_path)
 
     # print classification errors by method, size, and class # [(class, size, error)]
     interpolation_errors_by_class = []
@@ -135,14 +150,14 @@ def confu_multigraph(size_method_filenames):
     interpolation_errors_by_class = sorted(interpolation_errors_by_class, key=lambda siz: siz[1])
     interpolation_errors_by_class = sorted(interpolation_errors_by_class, key=lambda siz: siz[0])
     ax1 = plt.figure().add_subplot(111)
-    ax1.set_ylabel("Error de clasificacion")
+    ax1.set_ylabel("Tasa de acierto")
     ax1.set_xlabel("Longitud de muestra")
     for class_idx,class_name in enumerate(classes):
-        current_class_errors = interpolation_errors_by_class[10*class_idx:10*class_idx+9]
+        current_class_errors = interpolation_errors_by_class[10*class_idx:10*class_idx+10]
         plt.plot([err[1] for err in current_class_errors],[err[2] for err in current_class_errors],".-",label=class_name)
     plt.legend(loc=3)
-    plt.title("Error de clasificacion con interpolacion por clase")
-    plt.savefig("%s/classification-errors-with-interpolation-by-class-and-size"%graphs_path)
+    plt.title("Tasa de acierto con interpolado por clase")
+    savefig("%s/classification-errors-with-interpolation-by-class-and-size"%graphs_path)
 
     for size,confumat in lpadding_confumats.iteritems():
         for idx,row in enumerate(confumat):
@@ -151,14 +166,15 @@ def confu_multigraph(size_method_filenames):
     lpadding_errors_by_class = sorted(lpadding_errors_by_class, key=lambda siz: siz[1])
     lpadding_errors_by_class = sorted(lpadding_errors_by_class, key=lambda siz: siz[0])
     ax1 = plt.figure().add_subplot(111)
-    ax1.set_ylabel("Error de clasificacion")
+    ax1.set_ylabel("Tasa de acierto")
     ax1.set_xlabel("Longitud de muestra")
+    # print lpadding_errors_by_class
     for class_idx,class_name in enumerate(classes):
-        current_class_errors = lpadding_errors_by_class[10*class_idx:10*class_idx+9]
+        current_class_errors = lpadding_errors_by_class[10*class_idx:10*class_idx+10]
         plt.plot([err[1] for err in current_class_errors],[err[2] for err in current_class_errors],".-",label=class_name)
     plt.legend(loc=4)
-    plt.title("Error de clasificacion con relleno por la izquierda por clase")
-    plt.savefig("%s/classification-errors-with-leftpadding-by-class-and-size"%graphs_path)
+    plt.title("Tasa de acierto con relleno por la izquierda por clase")
+    savefig("%s/classification-errors-with-leftpadding-by-class-and-size"%graphs_path)
 
     for size,confumat in rpadding_confumats.iteritems():
         for idx,row in enumerate(confumat):
@@ -167,14 +183,40 @@ def confu_multigraph(size_method_filenames):
     rpadding_errors_by_class = sorted(rpadding_errors_by_class, key=lambda siz: siz[1])
     rpadding_errors_by_class = sorted(rpadding_errors_by_class, key=lambda siz: siz[0])
     ax1 = plt.figure().add_subplot(111)
-    ax1.set_ylabel("Error de clasificacion")
+    ax1.set_ylabel("Tasa de acierto")
     ax1.set_xlabel("Longitud de muestra")
     for class_idx,class_name in enumerate(classes):
-        current_class_errors = rpadding_errors_by_class[10*class_idx:10*class_idx+9]
+        current_class_errors = rpadding_errors_by_class[10*class_idx:10*class_idx+10]
         plt.plot([err[1] for err in current_class_errors],[err[2] for err in current_class_errors],".-",label=class_name)
     plt.legend(loc=4)
-    plt.title("Error de clasificacion con relleno por la derecha por clase")
-    plt.savefig("%s/classification-errors-with-rightpadding-by-class-and-size"%graphs_path)
+    plt.title("Tasa de acierto con relleno por la derecha por clase")
+    savefig("%s/classification-errors-with-rightpadding-by-class-and-size"%graphs_path)
+    # EXTRACT best case for each method (size=100) see what classes are confused more often
+    rp100cm = rpadding_confumats['100']
+    lp100cm = lpadding_confumats['100']
+    i100cm = interpolation_confumats['100']
+
+#
+# def curvas_roc(size_method_filenames):
+#     interpolation_confumats = dict()
+#     rpadding_confumats = dict()
+#     lpadding_confumats = dict()
+#     classes = []
+#     for size,method,filename in size_method_filenames:
+#         file = open(results_path+"/"+filename)
+#         classes = file.readline().strip().split()
+#         if method=="interpolation":
+#             interpolation_confumats[size] = [[float(a) for a in line.strip().split(" ")] for line in file]
+#         elif method=="left_padding":
+#             lpadding_confumats[size] = [[float(a) for a in line.strip().split(" ")] for line in file]
+#         elif method=="right_padding":
+#             rpadding_confumats[size] = [[float(a) for a in line.strip().split(" ")] for line in file]
+#     for key,confumat in interpolation_confumats.iterkeys():
+#         tpr,fpr = roc_rates(confumat)
+#     pass
+
+
+
 
 error_files = []
 confu_files = []
@@ -183,12 +225,12 @@ for filename in file_list:
     file = open(results_path+"/"+filename,"r")
     if(res_type=="error"):
         error_files.append((size,method,filename))
-        # error_graph(size,method,file) #indvidual graph for this
+        error_graph(size,method,file) #indvidual graph for this
     elif(res_type=="confumat"):
         confu_files.append((size,method,filename))
-        # confu_graph(size,method,file)
-# error_multigraph(error_files)
+        confu_graph(size,method,file)
+error_multigraph(error_files)
 confu_multigraph(confu_files)
+# curvas_roc(confu_files)
 
 
-# plt.savefig('myfig')
