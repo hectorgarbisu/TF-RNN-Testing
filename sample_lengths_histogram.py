@@ -1,11 +1,12 @@
 __author__ = 'geco'
 
 from os import listdir
-# matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-images_path = "./sample_images/"
+images_path = "./graphs/"
 dataset_path = "./dataset/"
 file_list = listdir(dataset_path)
 sizes = {
@@ -51,7 +52,7 @@ plt.ylabel('Cantidad de muestras')
 plt.title('Cantidad de muestras por clase y longitud sin bucketing')
 plt.grid(True)
 plt.legend()
-plt.show()
+plt.savefig("%s/histograma_%d"%(images_path,num_buckets))
 plt.close()
 
 num_buckets = 40
@@ -63,7 +64,7 @@ plt.ylabel('Cantidad de muestras')
 plt.title('Cantidad de muestras por clase y longitud con %d buckets'%(num_buckets))
 plt.grid(True)
 plt.legend()
-plt.show()
+plt.savefig("%s/histograma_%d"%(images_path,num_buckets))
 plt.close()
 
 num_buckets = 15
@@ -75,7 +76,7 @@ plt.ylabel('Cantidad de muestras')
 plt.title('Cantidad de muestras por clase y longitud con %d buckets'%(num_buckets))
 plt.grid(True)
 plt.legend()
-plt.show()
+plt.savefig("%s/histograma_%d"%(images_path,num_buckets))
 plt.close()
 
 
@@ -88,5 +89,5 @@ plt.ylabel('Cantidad de muestras')
 plt.title('Cantidad de muestras por clase y longitud con %d buckets'%(num_buckets))
 plt.grid(True)
 plt.legend()
-plt.show()
+plt.savefig("%s/histograma_%d"%(images_path,num_buckets))
 plt.close()
